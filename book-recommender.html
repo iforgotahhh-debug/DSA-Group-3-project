@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DSA — Book Recommendations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <!-- Preconnect to Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Define color variables for the theme */
+    :root {   /* root means the whole page */
+      --ink: #0D0F14;
+      --paper: #E8D5B0;
+      --paper-dim: #B8A88A;
+      --violet: #7C5CBF;
+      --violet-dark: #5A3E9A;
+      --slate: #8A8F9E;
+      --surface: #181B23;
+      --surface-raised: #1F2230;
+      --border: rgba(232, 213, 176, 0.1);
+      --border-mid: rgba(232, 213, 176, 0.22);
+    }
+
+    body { 
+      background: var(--ink);
+      color: #F0E8D5;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    nav { /* nav is the top bar */
+      background: var(--ink);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand { /* the main title of the page */
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      color: var(--paper);
+    }
+
+    .nav-sub { /* the subtitle of the page */
+      font-size: 12px;
+      color: var(--slate);
+    }
+
+    /* HERO */
+    .hero {
+      padding: 64px 2rem 48px;
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 600;
+      line-height: 1.15;
+      color: var(--paper);
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      opacity: 0.65;
+    }
+
+    .hero p {
+      color: var(--slate);
+      max-width: 460px;
+      margin: 0 auto 2rem;
+    }
+
+    /* AI RECOMMEND INPUT */
+    .recommend-wrap {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .recommend-field {
+      display: flex;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-mid);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .recommend-field:focus-within {
+      border-color: var(--violet);
+    }
+
+    .recommend-field input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      padding: 13px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #F0E8D5;
+    }
+
+    .recommend-field input::placeholder { color: var(--slate); }
+
+    .recommend-field button {
+      background: var(--violet);
+      border: none;
+      cursor: pointer;
+      padding: 13px 22px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: white;
+    }
+
+    .recommend-field button:hover { background: var(--violet-dark); }
+    .recommend-field button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .hint-pills {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .hint-pill {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 13px;
+      font-size: 12px;
+      color: var(--slate);
+      cursor: pointer;
+    }
+
+    .hint-pill:hover {
+      border-color: var(--border-mid);
+      color: #F0E8D5;
+    }
+
+    /* TOOLBAR (filter + section label) */
+    .toolbar {
+      max-width: 920px;
+      margin: 2.5rem auto 1.25rem;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .toolbar h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      font-weight: 400;
+      color: var(--paper-dim);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .filter-input-wrap {
+      display: flex;
+      align-items: center;
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      overflow: hidden;
+      max-width: 260px;
+      width: 100%;
+    }
+
+    .filter-input-wrap:focus-within {
+      border-color: var(--border-mid);
+    }
+
+    .filter-input-wrap input {
+      background: none;
+      border: none;
+      outline: none;
+      padding: 7px 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: #F0E8D5;
+      width: 100%;
+    }
+
+    .filter-input-wrap input::placeholder { color: var(--slate); }
+
+    .filter-clear {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 10px;
+      color: var(--slate);
+      font-size: 16px;
+      line-height: 1;
+      display: none;
+    }
+
+    .filter-clear:hover { color: #F0E8D5; }
+
+    /* BOOKS GRID */
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 0 2rem 5rem;
+    }
+
+    .book-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .book-card:hover { border-color: var(--border-mid); } /* it hovers only when the mouse is over it */
+
+    .book-cover {
+      height: 190px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .book-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .book-cover-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-style: italic;
+      color: var(--paper);
+      opacity: 0.2;
+    }
+
+    .genre-tag {
+      position: absolute;
+      bottom: 8px;
+      left: 10px;
+      background: rgba(13, 15, 20, 0.75);
+      border-radius: 3px;
+      padding: 2px 8px;
+      font-size: 11px;
+      color: var(--paper-dim);
+    }
+
+    .book-body {
+      padding: 1rem 1.1rem 1.1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .book-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      color: var(--paper);
+      line-height: 1.3;
+      margin-bottom: 3px;
+    }
+
+    .book-author {
+      font-size: 12px;
+      color: var(--slate);
+      margin-bottom: 0.7rem;
+    }
+
+    .book-reason {
+      font-size: 13px;
+      color: rgba(240, 232, 213, 0.6);
+      line-height: 1.55;
+      font-style: italic;
+      flex: 1;
+      margin-bottom: 1rem;
+    }
+
+    .btn-details { /* the button on each book card to open the detail overlay */
+      background: none;
+      border: 1px solid var(--border-mid);
+      border-radius: 4px;
+      padding: 7px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: var(--paper-dim);
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+    }
+
+    .btn-details:hover {
+      border-color: var(--violet);
+      color: #F0E8D5;
+    }
+
+    /* EMPTY / STATUS */
+    .status-text {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--slate);
+      font-size: 14px;
+    }
+
+    .error-text {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 2rem 1rem;
+      color: #c0706f;
+      font-size: 14px;
+    }
+
+    /* DETAIL OVERLAY */
+    .overlay { /* the full screen overlay that appears when you click "View details" on a book card */
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(13, 15, 20, 0.85);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .overlay.open { display: flex; } /* when the overlay has the "open" class, it becomes visible */
+
+    .detail-panel { /* the panel in the center of the overlay that shows the book details */
+      background: var(--surface);
+      border: 1px solid var(--border-mid);
+      border-radius: 8px;
+      max-width: 520px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .detail-cover {
+      height: 220px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .detail-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .detail-cover-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 5rem;
+      font-style: italic;
+      color: var(--paper);
+      opacity: 0.15;
+    }
+
+    .detail-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(13, 15, 20, 0.7);
+      border: 1px solid var(--border-mid);
+      border-radius: 4px;
+      color: var(--paper-dim);
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px 9px;
+    }
+
+    .detail-close:hover { color: #F0E8D5; }
+
+    .detail-body {
+      padding: 1.4rem 1.5rem 1.5rem;
+    }
+
+    .detail-genre {
+      font-size: 11px;
+      color: var(--violet);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .detail-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--paper);
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .detail-author {
+      font-size: 13px;
+      color: var(--slate);
+      margin-bottom: 1rem;
+    }
+
+    .detail-reason {
+      font-size: 14px;
+      color: rgba(240, 232, 213, 0.7);
+      line-height: 1.6;
+      font-style: italic;
+      border-left: 2px solid var(--border-mid);
+      padding-left: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .detail-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      background: var(--violet);
+      border: none;
+      border-radius: 4px;
+      padding: 10px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: white;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover { background: var(--violet-dark); }
+
+    .btn-secondary { /* the "Close" button in the detail overlay */
+      flex: 1;
+      background: none;
+      border: 1px solid var(--border-mid);
+      border-radius: 4px;
+      padding: 10px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: var(--paper-dim);
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--violet);
+      color: #F0E8D5;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 12px;
+      color: var(--slate);
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <span class="nav-brand">DSA</span> <!-- span is an inline container used to group inline elements in this case, pieces of text-->
+    <span class="nav-sub">Book discovery</span>
+  </nav>
+
+  <section class="hero">
+    <h1>Find your next<br><em>great read</em></h1> <!-- em is used for emphasis and is by default in italic-->
+    <p>Describe what you're in the mood for: a theme, a feeling, a book you loved.</p> <!-- p is a paragraph element -->
+
+  <!-- additional content -->
+  </section>
+    <div class="recommend-wrap">
+      <div class="recommend-field">
+        <input
+          type="text"
+          id="recommendInput"
+          placeholder="e.g. like Dune but shorter, or literary fiction about grief…"
+          autocomplete="off"  
+        > <!-- autocomplete="off" turns off autocomplete suggestions from the browser -->
+        <button id="recommendBtn" onclick="getRecommendations()">Recommend</button>
+      </div>
+      <div class="hint-pills">
+        <button class="hint-pill" onclick="fillAndSearch('literary fiction about grief and memory')">grief & memory</button>
+        <button class="hint-pill" onclick="fillAndSearch('fast-paced thriller with twists')">thrillers</button>
+        <button class="hint-pill" onclick="fillAndSearch('magical realism like Gabriel García Márquez')">magical realism</button>
+        <button class="hint-pill" onclick="fillAndSearch('short story collections, modern')">short stories</button>
+        <button class="hint-pill" onclick="fillAndSearch('hard sci-fi with realistic science')">hard sci-fi</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="toolbar">
+    <h2 id="sectionLabel">Staff picks</h2>
+    <div class="filter-input-wrap">
+      <input type="text" id="filterInput" placeholder="Filter by title, author, genre…" oninput="onFilter()" autocomplete="off">
+      <button class="filter-clear" id="filterClear" onclick="clearFilter()" title="Clear filter">×</button>
+    </div>
+  </div>
+
+  <div id="booksContainer" class="books-grid"></div>
+
+  <!-- Detail overlay -->
+  <div class="overlay" id="overlay" onclick="closeOverlayOnBg(event)">
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-cover" id="detailCover">
+        <div class="detail-cover-fallback" id="detailFallback">§</div>
+        <img id="detailImg" src="" alt="" style="display:none">
+        <button class="detail-close" onclick="closeOverlay()">×</button>
+      </div>
+      <div class="detail-body">
+        <div class="detail-genre" id="detailGenre"></div>
+        <div class="detail-title" id="detailTitle"></div>
+        <div class="detail-author" id="detailAuthor"></div>
+        <p class="detail-reason" id="detailReason"></p>
+        <div class="detail-actions">
+          <button class="btn-primary" id="detailFindSimilar">Find similar books</button>
+          <button class="btn-secondary" onclick="closeOverlay()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>DSA · 2026</footer>
+
+  <script>
+    // JavaScript code to handle the book recommendations, filtering, and detail overlay
+    // The JavaScript code is responsible for the interactivity of the page, including fetching
+    // book recommendations from the API, filtering the displayed books based on user input,
+    // and managing the detail overlay when a book is clicked.
+    const DEFAULT_BOOKS = [
+      {
+        title: "Dune",
+        author: "Frank Herbert",
+        genre: "Sci-Fi",
+        reason: "An unmatched blend of ecology, religion, and interstellar politics. Still the definitive space epic.",
+        cover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&q=80"
+      },
+      {
+        title: "The Hobbit",
+        author: "J.R.R. Tolkien",
+        genre: "Fantasy",
+        reason: "A perfect adventure story that rewards readers of any age with warmth, wonder, and hard-won courage.",
+        cover: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&q=80"
+      },
+      {
+        title: "The Complete Sherlock Holmes",
+        author: "Arthur Conan Doyle",
+        genre: "Mystery",
+        reason: "Timeless deductive storytelling. Each case is a precise mechanism — satisfying to read in any order.",
+        cover: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=400&q=80"
+      }
+    ];
+
+    const coverBgs = ['#1E1828','#182018','#201A10','#0E1A1A','#1A1020'];
+
+    let currentBooks = [...DEFAULT_BOOKS];
+    let filterQuery = '';
+
+    function getBg(title) {
+      return coverBgs[title.charCodeAt(0) % coverBgs.length];
+    }
+
+    function renderBooks(books) {
+      const container = document.getElementById('booksContainer');
+      container.innerHTML = '';
+
+      const filtered = filterQuery
+        ? books.filter(b => {
+            const q = filterQuery.toLowerCase();
+            return (
+              b.title.toLowerCase().includes(q) ||
+              b.author.toLowerCase().includes(q) ||
+              (b.genre || '').toLowerCase().includes(q)
+            );
+          })
+        : books;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<p class="status-text">No books match "${filterQuery}".</p>`;
+        return;
+      }
+
+      filtered.forEach(book => {
+        const bg = getBg(book.title);
+        const card = document.createElement('div');
+        card.className = 'book-card';
+
+        const imgHtml = book.cover
+          ? `<img src="${book.cover}" alt="${book.title}" loading="lazy" onerror="this.style.display='none'">`
+          : '';
+
+        card.innerHTML = `
+          <div class="book-cover" style="background:${bg}">
+            ${imgHtml}
+            ${!book.cover ? '<div class="book-cover-fallback">§</div>' : ''}
+            <span class="genre-tag">${book.genre || 'Fiction'}</span>
+          </div>
+          <div class="book-body">
+            <div class="book-title">${book.title}</div>
+            <div class="book-author">${book.author}</div>
+            <p class="book-reason">${book.reason}</p>
+            <button class="btn-details" onclick="openDetail(${JSON.stringify(book).replace(/"/g, '&quot;')})">View details</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function onFilter() {
+      filterQuery = document.getElementById('filterInput').value.trim();
+      document.getElementById('filterClear').style.display = filterQuery ? 'block' : 'none';
+      renderBooks(currentBooks);
+    }
+
+    function clearFilter() {
+      document.getElementById('filterInput').value = '';
+      filterQuery = '';
+      document.getElementById('filterClear').style.display = 'none';
+      renderBooks(currentBooks);
+    }
+
+    function openDetail(book) {
+      const img = document.getElementById('detailImg');
+      const fallback = document.getElementById('detailFallback');
+      const cover = document.getElementById('detailCover');
+
+      cover.style.background = getBg(book.title);
+
+      if (book.cover) {
+        img.src = book.cover;
+        img.alt = book.title;
+        img.style.display = 'block';
+        fallback.style.display = 'none';
+        img.onerror = () => { img.style.display = 'none'; fallback.style.display = 'flex'; };// if the image fails to load, hide it and show the fallback
+      } else {
+        img.style.display = 'none';
+        fallback.style.display = 'flex';
+      }
+
+      document.getElementById('detailGenre').textContent = book.genre || 'Fiction';
+      document.getElementById('detailTitle').textContent = book.title;
+      document.getElementById('detailAuthor').textContent = book.author;
+      document.getElementById('detailReason').textContent = book.reason;
+
+      document.getElementById('detailFindSimilar').onclick = () => {
+        closeOverlay();
+        fillAndSearch(`books similar to "${book.title}" by ${book.author}`);// when the user clicks "Find similar books", close the overlay and perform a new search based on the current book's title and author
+      };
+
+      document.getElementById('overlay').classList.add('open');// show the overlay
+    }
+
+    function closeOverlay() {
+      document.getElementById('overlay').classList.remove('open'); // hide the overlay
+    }
+
+    function closeOverlayOnBg(e) {
+      if (e.target === document.getElementById('overlay')) closeOverlay();// if you click on the background of the overlay ,not the detail panel, close the overlay
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeOverlay();// if the user presses the escape key, close the overlay, a common UX pattern for modals and overlays
+    });
+
+    function fillAndSearch(query) {
+      document.getElementById('recommendInput').value = query;// fill the input field with the query
+      getRecommendations();
+    }
+
+    document.getElementById('recommendInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') getRecommendations();
+    });
+
+    async function getRecommendations() { // this function is called when the user clicks the "Recommend" button or presses Enter in the input field
+      const query = document.getElementById('recommendInput').value.trim();
+      if (!query) return;
+
+      const btn = document.getElementById('recommendBtn');
+      const label = document.getElementById('sectionLabel');
+
+      btn.disabled = true;
+      btn.textContent = 'Loading…';
+      label.textContent = `Results for "${query.length > 45 ? query.slice(0, 45) + '…' : query}"`;
+
+      clearFilter();
+
+      const container = document.getElementById('booksContainer');
+      container.innerHTML = '<p class="status-text">Finding books…</p>';
+
+      const prompt = `You are a book recommendation engine. The user is looking for: "${query}" 
+
+Return EXACTLY 3 book recommendations as a JSON array. No preamble, no explanation, just the raw JSON array.
+
+Each object must have these exact keys:
+- "title": string
+- "author": string (full name)
+- "genre": string (1-3 words)
+- "reason": string (1-2 sentences written directly to the reader explaining why this matches)
+
+Return only valid JSON. Example:
+[{"title":"...","author":"...","genre":"...","reason":"..."}]`; // prompt to the ai engine, this is incase we will add that feature in the future, for now it is just a placeholder
+
+      try {
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-6",
+            max_tokens: 1000,
+            messages: [{ role: "user", content: prompt }]
+          })
+        });// send a POST request to the API with the prompt and other parameters. API (Application Programming Interface) is a set of rules that allows different software applications to communicate with each other. In this case, the code is sending a request to an AI model to get book recommendations based on the user's input.
+
+        if (!res.ok) throw new Error(`API error ${res.status}`);
+
+        const data = await res.json();
+        const text = data.content.map(b => b.text || '').join('');
+        const clean = text.replace(/```json|```/g, '').trim();
+        const books = JSON.parse(clean);
+
+        if (!Array.isArray(books) || books.length === 0) throw new Error('Bad response');
+
+        currentBooks = books;
+        renderBooks(currentBooks);
+      } catch (err) {
+        container.innerHTML = '<p class="error-text">Something went wrong. Try again in a moment.</p>';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Recommend';
+      }// finally block is executed after the try and catch blocks, regardless of whether an error occurred or not. It is used here to re-enable the button and reset its text, ensuring that the user can try again even if an error occurred during the API request.
+    }
+
+    // init
+    renderBooks(currentBooks);
+  </script>
+</body>
+</html>
